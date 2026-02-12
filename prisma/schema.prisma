@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 用户模型
+model User {
+  id            String    @id @default(cuid())
+  name          String    @unique // 用户名，唯一，用于登录
+  password      String
+  avatar        String?
+  role          String    @default("user") // superadmin, admin, user
+  permissions   String    @default("[]") // JSON数组存储模块权限
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // 关联
+  files         File[]
+  tasks         AnalysisTask[]
+  reports       Report[]
+  sessions      Session[]
+}
+
+// 会话模型（用于登录状态管理）
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  token        String   @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// 上传文件模型
+model File {
+  id            String   @id @default(cuid())
+  filename      String
+  originalName  String
+  mimeType      String
+  size          Int
+  path          String
+  userId        String
+  createdAt     DateTime @default(now())
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks         AnalysisTask[]
+}
+
+// 分析任务模型
+model AnalysisTask {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  status        String   @default("pending") // pending, processing, completed, failed
+  progress      Int      @default(0) // 0-100
+  errorMessage  String?
+  userId        String
+  fileId        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  completedAt   DateTime?
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  file          File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  reports       Report[]
+}
+
+// 分析报告模型
+model Report {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  content       String?  // JSON格式的分析结果
+  filePath      String?  // 报告文件路径
+  fileType      String   @default("pdf") // pdf, excel, json
+  taskId        String
+  userId        String
+  createdAt     DateTime @default(now())
+  
+  task          AnalysisTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// 系统配置模型
+model SystemConfig {
+  id            String   @id @default(cuid())
+  key           String   @unique
+  value         String
+  description   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

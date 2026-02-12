@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # Next.js 前端应用
+  # ============================================
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:/app/prisma/dev.db
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      - PYTHON_SERVICE_URL=http://python-service:8000
+      - UPLOAD_DIR=/app/uploads
+    volumes:
+      - web_uploads:/app/uploads
+      - sqlite_data:/app/prisma
+    depends_on:
+      - python-service
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # ============================================
+  # Python Agent 服务
+  # ============================================
+  python-service:
+    build:
+      context: ./python_service
+      dockerfile: Dockerfile
+    ports:
+      - "${PYTHON_PORT:-8000}:8000"
+    environment:
+      - LLM_API_URL=${LLM_API_URL:-https://api.openai.com/v1/chat/completions}
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
+      - MAX_AGENT_ITERATIONS=${MAX_AGENT_ITERATIONS:-15}
+    volumes:
+      - python_uploads:/app/uploads
+    restart: unless-stopped
+    networks:
+      - app-network
+
+# ============================================
+# 数据卷
+# ============================================
+volumes:
+  web_uploads:
+    driver: local
+  python_uploads:
+    driver: local
+  sqlite_data:
+    driver: local
+
+# ============================================
+# 网络
+# ============================================
+networks:
+  app-network:
+    driver: bridge
