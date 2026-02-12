@@ -492,6 +492,35 @@ docker compose exec web npx prisma db push
 
 ---
 
+## 步骤8.1: 创建超级管理员账号
+
+如果注册入口已关闭，需要手动创建管理员账号：
+
+```bash
+# 在服务器项目目录执行
+cd /opt/data_analysis_agent
+
+# 运行创建管理员脚本
+docker compose exec web node scripts/create-admin.js
+```
+
+**成功输出：**
+
+```
+✅ 超级管理员 "卢金旭" 创建成功！
+
+📋 账号信息：
+   用户名: 卢金旭
+   密码: samsung360
+   角色: superadmin
+
+🔒 请登录后立即修改密码！
+```
+
+> ⚠️ **安全提示**：登录后请立即在「设置」中修改密码！
+
+---
+
 ## 步骤9: 验证部署
 
 ### 9.1 测试服务连通性
@@ -769,6 +798,220 @@ docker system prune -a
 # 清理未使用的卷
 docker volume prune
 ```
+
+---
+
+## 🌐 域名配置（dukemon.top）
+
+如果您有自己的域名，按以下步骤配置，可以通过 `https://dukemon.top` 访问您的应用。
+
+### 步骤1: 配置域名解析（DNS）
+
+#### 1.1 登录阿里云域名控制台
+
+1. 访问 [阿里云域名控制台](https://dc.console.aliyun.com/next/index#/domain-list/all)
+2. 找到您的域名 `dukemon.top`
+3. 点击「解析」进入 DNS 解析设置
+
+#### 1.2 添加 A 记录
+
+点击「添加记录」，添加以下两条记录：
+
+| 记录类型 | 主机记录 | 记录值        | TTL    |
+| -------- | -------- | ------------- | ------ |
+| A        | @        | 8.146.205.197 | 10分钟 |
+| A        | www      | 8.146.205.197 | 10分钟 |
+
+**说明**：
+
+- `@` 表示直接访问 `dukemon.top`
+- `www` 表示访问 `www.dukemon.top`
+- 记录值填写您的服务器公网 IP
+
+#### 1.3 验证解析生效
+
+等待 2-10 分钟后，在本地测试：
+
+```bash
+# Windows PowerShell 或 cmd
+ping dukemon.top
+
+# 应该返回您的服务器IP
+```
+
+---
+
+### 步骤2: 安装 Nginx
+
+SSH 连接到服务器后执行：
+
+```bash
+# 安装 Nginx
+sudo yum install -y nginx
+
+# 启动 Nginx
+sudo systemctl start nginx
+
+# 设置开机自启
+sudo systemctl enable nginx
+
+# 检查状态
+sudo systemctl status nginx
+```
+
+---
+
+### 步骤3: 配置 Nginx 反向代理
+
+#### 3.1 创建 Nginx 配置文件
+
+```bash
+sudo nano /etc/nginx/conf.d/dukemon.conf
+```
+
+#### 3.2 粘贴以下配置
+
+```nginx
+# HTTP 服务器 - 重定向到 HTTPS（SSL配置后生效）
+server {
+    listen 80;
+    server_name dukemon.top www.dukemon.top;
+
+    # 先配置HTTP访问，后续添加HTTPS后会自动重定向
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+
+        # 超时设置
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+
+    # 文件上传大小限制
+    client_max_body_size 50M;
+}
+```
+
+#### 3.3 保存并测试配置
+
+```bash
+# 保存文件：Ctrl+X → Y → Enter
+
+# 测试 Nginx 配置语法
+sudo nginx -t
+
+# 如果显示 "syntax is ok" 和 "test is successful"，重载配置
+sudo systemctl reload nginx
+```
+
+#### 3.4 测试 HTTP 访问
+
+打开浏览器访问：`http://dukemon.top`
+
+如果能看到登录页面，说明配置成功！
+
+---
+
+### 步骤4: 配置 HTTPS（SSL 证书）
+
+#### 4.1 安装 Certbot
+
+```bash
+# 安装 EPEL 仓库
+sudo yum install -y epel-release
+
+# 安装 Certbot 和 Nginx 插件
+sudo yum install -y certbot python3-certbot-nginx
+```
+
+#### 4.2 申请 SSL 证书
+
+```bash
+# 申请证书（会自动修改 Nginx 配置）
+sudo certbot --nginx -d dukemon.top -d www.dukemon.top
+```
+
+**交互式提示**：
+
+1. 输入邮箱地址（用于证书到期提醒）
+2. 同意服务条款：输入 `Y`
+3. 是否分享邮箱：输入 `N`（可选）
+4. 选择是否重定向 HTTP 到 HTTPS：输入 `2`（推荐，自动重定向）
+
+#### 4.3 验证 HTTPS
+
+访问：`https://dukemon.top`
+
+浏览器地址栏应该显示🔒锁图标。
+
+#### 4.4 设置证书自动续期
+
+Let's Encrypt 证书有效期为 90 天，需要设置自动续期：
+
+```bash
+# 测试续期命令
+sudo certbot renew --dry-run
+
+# 如果测试成功，添加定时任务
+sudo crontab -e
+
+# 添加以下行（每天凌晨2点检查并续期）
+0 2 * * * certbot renew --quiet
+```
+
+---
+
+### 步骤5: 更新应用环境变量
+
+修改 `.env` 文件，更新应用 URL：
+
+```bash
+cd /opt/data_analysis_agent
+nano .env
+```
+
+修改以下内容：
+
+```bash
+# 修改为您的域名（使用 HTTPS）
+NEXT_PUBLIC_APP_URL=https://dukemon.top
+```
+
+保存后重启服务：
+
+```bash
+docker compose restart
+```
+
+---
+
+### 步骤6: 优化安全组配置
+
+域名配置完成后，可以优化阿里云安全组：
+
+1. 登录阿里云 ECS 控制台
+2. 进入安全组配置
+3. **保留**：80（HTTP）、443（HTTPS）
+4. **可移除**：3000 端口（现在通过 Nginx 代理，无需直接暴露）
+
+---
+
+### 域名配置完成检查清单
+
+- [ ] 域名解析已生效（`ping dukemon.top` 返回服务器IP）
+- [ ] HTTP 访问正常（`http://dukemon.top`）
+- [ ] HTTPS 访问正常（`https://dukemon.top` 显示🔒）
+- [ ] HTTP 自动重定向到 HTTPS
+- [ ] 环境变量已更新为 `https://dukemon.top`
+- [ ] 证书自动续期已配置
 
 ---
 
