@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # ============================================
@@ -18,7 +18,7 @@ services:
       - PYTHON_SERVICE_URL=http://python-service:8000
       - UPLOAD_DIR=/app/uploads
     volumes:
-      - web_uploads:/app/uploads
+      - shared_uploads:/app/uploads
       - sqlite_data:/app/prisma
     depends_on:
       - python-service
@@ -41,7 +41,7 @@ services:
       - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
       - MAX_AGENT_ITERATIONS=${MAX_AGENT_ITERATIONS:-15}
     volumes:
-      - python_uploads:/app/uploads
+      - shared_uploads:/app/uploads
     restart: unless-stopped
     networks:
       - app-network
@@ -50,9 +50,7 @@ services:
 # 数据卷
 # ============================================
 volumes:
-  web_uploads:
-    driver: local
-  python_uploads:
+  shared_uploads:
     driver: local
   sqlite_data:
     driver: local
