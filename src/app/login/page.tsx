@@ -61,7 +61,7 @@ export default function LoginPage() {
               <span className="text-3xl">🚀</span>
             </div>
             <h1 className="text-2xl font-bold text-[var(--foreground)]">
-              神奇妙妙屋-测试自动部署
+              神奇妙妙屋
             </h1>
             <p className="text-[var(--foreground)] mt-2 opacity-60 text-sm">
               欢迎回来，请登录你的账户

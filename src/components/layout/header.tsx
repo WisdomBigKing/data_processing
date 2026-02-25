@@ -32,7 +32,7 @@ export function Header() {
           <Link href="/" className="flex items-center gap-2 group">
             <span className="text-2xl group-hover:animate-pulse">🚀</span>
             <span className="text-xl font-bold text-[var(--primary)]">
-              神奇妙妙屋
+              神奇妙妙屋-测试自动部署
             </span>
           </Link>
 
