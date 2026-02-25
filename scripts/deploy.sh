@@ -25,7 +25,7 @@ cd "$PROJECT_DIR"
 
 echo -e "${YELLOW}[1/5] 拉取最新代码...${NC}"
 git fetch origin
-git reset --hard origin/main
+git reset --hard origin/master
 
 echo -e "${YELLOW}[2/5] 停止旧容器...${NC}"
 docker-compose down || true
