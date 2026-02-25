@@ -27,12 +27,15 @@ jobs:
             # 拉取最新代码
             git pull origin master
 
-            # 强制停止并删除旧容器
+            # 【零停机部署】先构建新镜像（旧容器继续运行）
+            echo "🔨 构建新镜像..."
+            docker-compose build
+
+            # 快速切换：停止旧容器并立即启动新容器
+            echo "🔄 切换到新容器..."
             docker-compose down --remove-orphans || true
             docker rm -f $(docker ps -aq --filter "name=data_processing") 2>/dev/null || true
-
-            # 重新构建并启动
-            docker-compose up -d --build
+            docker-compose up -d
 
             # 清理无用镜像和容器
             docker image prune -f

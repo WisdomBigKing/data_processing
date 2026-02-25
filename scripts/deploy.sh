@@ -27,14 +27,14 @@ echo -e "${YELLOW}[1/5] 拉取最新代码...${NC}"
 git fetch origin
 git reset --hard origin/master
 
-echo -e "${YELLOW}[2/5] 停止旧容器...${NC}"
+echo -e "${YELLOW}[2/5] 构建新镜像（旧容器继续运行）...${NC}"
+docker-compose build
+
+echo -e "${YELLOW}[3/5] 快速切换到新容器...${NC}"
 docker-compose down --remove-orphans || true
 docker rm -f $(docker ps -aq --filter "name=data_processing") 2>/dev/null || true
 
-echo -e "${YELLOW}[3/5] 构建新镜像...${NC}"
-docker-compose build --no-cache
-
-echo -e "${YELLOW}[4/5] 启动服务...${NC}"
+echo -e "${YELLOW}[4/5] 启动新容器...${NC}"
 docker-compose up -d
 
 echo -e "${YELLOW}[5/5] 清理无用镜像...${NC}"
