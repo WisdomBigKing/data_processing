@@ -27,13 +27,15 @@ jobs:
             # 拉取最新代码
             git pull origin master
 
-            # 停止旧容器
-            docker-compose down
+            # 强制停止并删除旧容器
+            docker-compose down --remove-orphans || true
+            docker rm -f $(docker ps -aq --filter "name=data_processing") 2>/dev/null || true
 
             # 重新构建并启动
             docker-compose up -d --build
 
-            # 清理无用镜像
+            # 清理无用镜像和容器
             docker image prune -f
+            docker container prune -f
 
             echo "✅ 部署完成！"
