@@ -13,8 +13,8 @@ from report_generator import ExcelParser, DataAnalyzer, ReportGeneratorAgent, ge
 
 # 测试文件路径
 TEST_FILES = [
-    r"c:\Users\宇宙无敌智慧大将军\Desktop\test\data_analysis_agent\project\香爆脆本月目标进度.xlsx",
-    r"c:\Users\宇宙无敌智慧大将军\Desktop\test\data_analysis_agent\project\真味道&好汤面.xlsx",
+    r"c:\Users\宇宙无敌智慧大将军\Desktop\test\data_processing\project\香爆脆本月目标进度.xlsx",
+    r"c:\Users\宇宙无敌智慧大将军\Desktop\test\data_processing\project\真味道&好汤面.xlsx",
 ]
 
 

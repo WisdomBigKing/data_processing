@@ -292,10 +292,10 @@ sudo yum install -y git
 cd /opt
 
 # 克隆项目（替换为您的仓库地址）
-git clone https://github.com/您的用户名/data_analysis_agent.git
+git clone https://github.com/您的用户名/data_processing.git
 
 # 进入项目目录
-cd data_analysis_agent
+cd data_processing
 ```
 
 ### 方式B: 使用 SCP 上传（适合新手）
@@ -304,19 +304,19 @@ cd data_analysis_agent
 
 #### 步骤 B.1: 准备项目文件
 
-1. 打开项目文件夹 `data_analysis_agent`
+1. 打开项目文件夹 `data_processing`
 2. **删除以下目录**（减小体积，会在服务器重新生成）：
    - `node_modules/`
    - `.next/`
    - `python_service/__pycache__/`
 3. 右键项目文件夹 → 发送到 → 压缩(zipped)文件夹
-4. 得到 `data_analysis_agent.zip`
+4. 得到 `data_processing.zip`
 
 #### 步骤 B.2: 上传到服务器
 
 ```powershell
 # 在本地 PowerShell 执行，替换路径和IP
-scp C:\path\to\data_analysis_agent.zip root@47.95.xxx.xxx:/opt/
+scp C:\path\to\data_processing.zip root@47.95.xxx.xxx:/opt/
 ```
 
 #### 步骤 B.3: 在服务器解压
@@ -329,10 +329,10 @@ cd /opt
 sudo yum install -y unzip
 
 # 解压项目
-unzip data_analysis_agent.zip
+unzip data_processing.zip
 
 # 进入项目目录
-cd data_analysis_agent
+cd data_processing
 ```
 
 ### 方式C: 使用 SFTP 工具（图形界面）
@@ -356,7 +356,7 @@ cd data_analysis_agent
 
 ```bash
 # 确保在项目目录
-cd /opt/data_analysis_agent
+cd /opt/data_processing
 
 # 创建 .env 文件
 nano .env
@@ -424,11 +424,11 @@ openssl rand -base64 32
 
 ```bash
 # 创建持久化数据目录
-mkdir -p /opt/data_analysis_agent/data/prisma
-mkdir -p /opt/data_analysis_agent/data/uploads
+mkdir -p /opt/data_processing/data/prisma
+mkdir -p /opt/data_processing/data/uploads
 
 # 设置权限
-chmod -R 777 /opt/data_analysis_agent/data
+chmod -R 777 /opt/data_processing/data
 ```
 
 ### 7.2 构建 Docker 镜像
@@ -437,7 +437,7 @@ chmod -R 777 /opt/data_analysis_agent/data
 
 ```bash
 # 确保在项目目录
-cd /opt/data_analysis_agent
+cd /opt/data_processing
 
 # 构建并启动（-d 表示后台运行）
 docker compose up -d --build
@@ -462,8 +462,8 @@ docker compose ps
 
 ```
 NAME                              STATUS
-data_analysis_agent-web-1          Up
-data_analysis_agent-python-service-1  Up
+data_processing-web-1          Up
+data_processing-python-service-1  Up
 ```
 
 如果 STATUS 不是 `Up`，查看错误日志：
@@ -498,7 +498,7 @@ docker compose exec web npx prisma db push
 
 ```bash
 # 在服务器项目目录执行
-cd /opt/data_analysis_agent
+cd /opt/data_processing
 
 # 运行创建管理员脚本
 docker compose exec web node scripts/create-admin.js
@@ -566,7 +566,7 @@ After=docker.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=/opt/data_analysis_agent
+WorkingDirectory=/opt/data_processing
 ExecStart=/usr/bin/docker compose up -d
 ExecStop=/usr/bin/docker compose down
 TimeoutStartSec=0
@@ -590,7 +590,7 @@ sudo systemctl enable data-analysis-agent
 ### 查看服务状态
 
 ```bash
-cd /opt/data_analysis_agent
+cd /opt/data_processing
 docker compose ps
 ```
 
@@ -634,7 +634,7 @@ docker compose down -v
 ### 更新部署
 
 ```bash
-cd /opt/data_analysis_agent
+cd /opt/data_processing
 
 # 如果使用 Git，先拉取最新代码
 git pull
@@ -665,10 +665,10 @@ docker compose exec web npx prisma db push
 mkdir -p /opt/backups
 
 # 备份数据库（从 Docker 卷复制）
-docker cp data_analysis_agent-web-1:/app/prisma/dev.db /opt/backups/dev_$(date +%Y%m%d).db
+docker cp data_processing-web-1:/app/prisma/dev.db /opt/backups/dev_$(date +%Y%m%d).db
 
 # 备份上传文件
-docker cp data_analysis_agent-web-1:/app/uploads /opt/backups/uploads_$(date +%Y%m%d)
+docker cp data_processing-web-1:/app/uploads /opt/backups/uploads_$(date +%Y%m%d)
 ```
 
 ### 自动备份脚本
@@ -682,10 +682,10 @@ DATE=$(date +%Y%m%d_%H%M%S)
 mkdir -p $BACKUP_DIR
 
 # 备份数据库
-docker cp data_analysis_agent-web-1:/app/prisma/dev.db $BACKUP_DIR/dev_$DATE.db
+docker cp data_processing-web-1:/app/prisma/dev.db $BACKUP_DIR/dev_$DATE.db
 
 # 备份上传文件
-docker cp data_analysis_agent-web-1:/app/uploads $BACKUP_DIR/uploads_$DATE
+docker cp data_processing-web-1:/app/uploads $BACKUP_DIR/uploads_$DATE
 
 # 清理7天前的备份
 find $BACKUP_DIR -mtime +7 -delete
@@ -974,7 +974,7 @@ sudo crontab -e
 修改 `.env` 文件，更新应用 URL：
 
 ```bash
-cd /opt/data_analysis_agent
+cd /opt/data_processing
 nano .env
 ```
 

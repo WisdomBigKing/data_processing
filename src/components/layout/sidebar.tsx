@@ -114,6 +114,26 @@ const navItems: Array<{
     ),
   },
   {
+    title: "文章处理",
+    href: "/article-processor",
+    permission: "reportGenerator",
+    icon: (
+      <svg
+        className="h-5 w-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+        />
+      </svg>
+    ),
+  },
+  {
     title: "报告中心",
     href: "/reports",
     permission: "reports",
@@ -282,8 +302,8 @@ export function Sidebar() {
   );
 
   return (
-    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:pt-16 lg:border-r lg:border-gray-200 lg:bg-white dark:lg:border-gray-700 dark:lg:bg-gray-900">
-      <nav className="flex-1 px-4 py-6 space-y-1">
+    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:pt-16 lg:border-r lg:border-[var(--border)] lg:bg-[var(--card)]/80 lg:backdrop-blur-md">
+      <nav className="flex-1 px-3 py-6 space-y-1">
         {filteredNavItems.map((item) => {
           const isActive =
             pathname === item.href || pathname.startsWith(item.href + "/");
@@ -292,10 +312,10 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                "flex items-center gap-3 px-3 py-2.5 rounded text-sm font-medium transition-all",
                 isActive
-                  ? "bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
-                  : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800",
+                  ? "bg-gradient-to-r from-[var(--primary)]/20 to-[var(--secondary)]/20 text-[var(--primary)] border-l-2 border-[var(--primary)] shadow-[0_0_15px_var(--glow)]"
+                  : "text-[var(--foreground)] opacity-70 hover:opacity-100 hover:bg-[var(--muted)] hover:text-[var(--primary)]",
               )}
             >
               {item.icon}
@@ -309,10 +329,10 @@ export function Sidebar() {
           <Link
             href="/users"
             className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+              "flex items-center gap-3 px-3 py-2.5 rounded text-sm font-medium transition-all",
               pathname === "/users" || pathname.startsWith("/users/")
-                ? "bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
-                : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800",
+                ? "bg-gradient-to-r from-[var(--primary)]/20 to-[var(--secondary)]/20 text-[var(--primary)] border-l-2 border-[var(--primary)] shadow-[0_0_15px_var(--glow)]"
+                : "text-[var(--foreground)] opacity-70 hover:opacity-100 hover:bg-[var(--muted)] hover:text-[var(--primary)]",
             )}
           >
             <svg
@@ -332,32 +352,6 @@ export function Sidebar() {
           </Link>
         )}
       </nav>
-
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white">
-          <h4 className="font-semibold mb-1">需要帮助？</h4>
-          <p className="text-sm opacity-90 mb-3">查看我们的使用指南</p>
-          <Link
-            href="/help"
-            className="inline-flex items-center text-sm font-medium hover:underline"
-          >
-            查看文档
-            <svg
-              className="ml-1 h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </Link>
-        </div>
-      </div>
     </aside>
   );
 }
