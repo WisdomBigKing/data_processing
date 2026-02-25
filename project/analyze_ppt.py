@@ -32,6 +32,6 @@ def analyze_ppt(filepath, name):
                         print(f"      Row {row_idx}: {row_data}")
 
 # 分析两个PPT
-analyze_ppt(r'c:\Users\宇宙无敌智慧大将军\Desktop\test\data_analysis_agent\project\真味道&好汤面.pptx', '真味道&好汤面.pptx')
+analyze_ppt(r'c:\Users\宇宙无敌智慧大将军\Desktop\test\data_processing\project\真味道&好汤面.pptx', '真味道&好汤面.pptx')
 print("\n" * 2)
-analyze_ppt(r'c:\Users\宇宙无敌智慧大将军\Desktop\test\data_analysis_agent\project\营运月会专案-香爆脆.pptx', '营运月会专案-香爆脆.pptx')
+analyze_ppt(r'c:\Users\宇宙无敌智慧大将军\Desktop\test\data_processing\project\营运月会专案-香爆脆.pptx', '营运月会专案-香爆脆.pptx')

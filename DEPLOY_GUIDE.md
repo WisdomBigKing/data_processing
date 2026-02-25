@@ -78,13 +78,13 @@
 
 在 Windows 上：
 
-1. 打开项目文件夹 `data_analysis_agent`
+1. 打开项目文件夹 `data_processing`
 2. **删除以下目录**（减小体积，这些会在服务器重新生成）：
    - `node_modules/`
    - `.next/`
    - `__pycache__/`
 3. 选中所有文件，右键 -> 发送到 -> 压缩文件夹
-4. 得到 `data_analysis_agent.zip`
+4. 得到 `data_processing.zip`
 
 #### 方式 B：使用 Git（推荐）
 
@@ -104,10 +104,10 @@ git push origin main
 1. 登录 1Panel 管理面板
 2. 点击左侧「文件」
 3. 导航到 `/opt/` 目录
-4. 点击「上传」按钮，选择 `data_analysis_agent.zip`
+4. 点击「上传」按钮，选择 `data_processing.zip`
 5. 等待上传完成
 6. 右键点击压缩包 -> 「解压」
-7. 确保解压后的目录名为 `data_analysis_agent`
+7. 确保解压后的目录名为 `data_processing`
 
 ### 方式 B：通过 Git 克隆
 
@@ -119,19 +119,19 @@ ssh root@你的服务器IP
 cd /opt
 
 # 克隆项目
-git clone https://github.com/你的用户名/data_analysis_agent.git
+git clone https://github.com/你的用户名/data_processing.git
 ```
 
 ### 方式 C：通过 SCP 上传
 
 ```bash
 # 在本地 Windows PowerShell 执行
-scp data_analysis_agent.zip root@你的服务器IP:/opt/
+scp data_processing.zip root@你的服务器IP:/opt/
 
 # SSH 登录服务器后解压
 ssh root@你的服务器IP
 cd /opt
-unzip data_analysis_agent.zip
+unzip data_processing.zip
 ```
 
 ---
@@ -145,7 +145,7 @@ unzip data_analysis_agent.zip
 ssh root@你的服务器IP
 
 # 进入项目目录
-cd /opt/data_analysis_agent
+cd /opt/data_processing
 
 # 复制环境变量模板（如果存在）
 cp env.production.template .env
@@ -177,9 +177,9 @@ WEB_PORT=3000
 PYTHON_PORT=8000
 
 # LLM配置（如果需要AI分析功能）
-LLM_API_URL=https://api.openai.com/v1/chat/completions
-LLM_API_KEY=你的OpenAI_API_Key
-LLM_MODEL=gpt-4o-mini
+LLM_API_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+LLM_API_KEY=你的阿里云API密钥
+LLM_MODEL=qwen-flash-2025-07-28
 ```
 
 **保存文件**：按 `Ctrl+X`，然后按 `Y`，最后按 `Enter`
@@ -199,12 +199,12 @@ openssl rand -base64 32
 
 ```bash
 # 创建数据持久化目录
-mkdir -p /opt/data_analysis_agent/data/prisma
-mkdir -p /opt/data_analysis_agent/data/uploads
-mkdir -p /opt/data_analysis_agent/data/python_uploads
+mkdir -p /opt/data_processing/data/prisma
+mkdir -p /opt/data_processing/data/uploads
+mkdir -p /opt/data_processing/data/python_uploads
 
 # 设置权限（确保容器可以读写）
-chmod -R 777 /opt/data_analysis_agent/data
+chmod -R 777 /opt/data_processing/data
 ```
 
 ---
@@ -217,7 +217,7 @@ chmod -R 777 /opt/data_analysis_agent/data
 
 ```bash
 # 进入项目目录
-cd /opt/data_analysis_agent
+cd /opt/data_processing
 
 # 构建并启动所有服务（首次需要5-15分钟）
 docker-compose up -d --build
@@ -235,8 +235,8 @@ docker-compose logs -f
 
 ```
 NAME                    STATUS
-data_analysis_agent-web-1           Up
-data_analysis_agent-python-service-1 Up
+data_processing-web-1           Up
+data_processing-python-service-1 Up
 ```
 
 ### 方式二：在 1Panel 图形界面操作
@@ -246,7 +246,7 @@ data_analysis_agent-python-service-1 Up
 3. 点击「创建编排」
 4. 选择「从 Compose 文件创建」
 5. 名称：`data-analysis-agent`
-6. 路径：`/opt/data_analysis_agent`
+6. 路径：`/opt/data_processing`
 7. 点击「确定」
 8. 找到创建的编排，点击「启动」
 
@@ -334,7 +334,7 @@ curl http://localhost:8000/health
 
 ```bash
 # 编辑 .env 文件
-nano /opt/data_analysis_agent/.env
+nano /opt/data_processing/.env
 
 # 修改 NEXT_PUBLIC_APP_URL 为你的域名
 NEXT_PUBLIC_APP_URL=https://your-domain.com
@@ -384,7 +384,7 @@ docker-compose down -v
 ### 更新部署
 
 ```bash
-cd /opt/data_analysis_agent
+cd /opt/data_processing
 
 # 如果使用 Git
 git pull
@@ -403,10 +403,10 @@ docker-compose exec web npx prisma db push
 
 ### 重要数据位置
 
-| 数据     | 路径                                          | 重要性          |
-| -------- | --------------------------------------------- | --------------- |
-| 数据库   | `/opt/data_analysis_agent/data/prisma/dev.db` | ⭐⭐⭐ 必须备份 |
-| 上传文件 | `/opt/data_analysis_agent/data/uploads/`      | ⭐⭐ 建议备份   |
+| 数据     | 路径                                      | 重要性          |
+| -------- | ----------------------------------------- | --------------- |
+| 数据库   | `/opt/data_processing/data/prisma/dev.db` | ⭐⭐⭐ 必须备份 |
+| 上传文件 | `/opt/data_processing/data/uploads/`      | ⭐⭐ 建议备份   |
 
 ### 手动备份
 
@@ -415,10 +415,10 @@ docker-compose exec web npx prisma db push
 mkdir -p /opt/backups
 
 # 备份数据库
-cp /opt/data_analysis_agent/data/prisma/dev.db /opt/backups/dev_$(date +%Y%m%d).db
+cp /opt/data_processing/data/prisma/dev.db /opt/backups/dev_$(date +%Y%m%d).db
 
 # 备份上传文件
-tar -czf /opt/backups/uploads_$(date +%Y%m%d).tar.gz /opt/data_analysis_agent/data/uploads
+tar -czf /opt/backups/uploads_$(date +%Y%m%d).tar.gz /opt/data_processing/data/uploads
 ```
 
 ### 自动备份（推荐）
@@ -430,8 +430,8 @@ cat > /opt/backup_data_analysis.sh << 'EOF'
 BACKUP_DIR="/opt/backups/data_analysis"
 DATE=$(date +%Y%m%d_%H%M%S)
 mkdir -p $BACKUP_DIR
-cp /opt/data_analysis_agent/data/prisma/dev.db $BACKUP_DIR/dev_$DATE.db
-tar -czf $BACKUP_DIR/uploads_$DATE.tar.gz /opt/data_analysis_agent/data/uploads
+cp /opt/data_processing/data/prisma/dev.db $BACKUP_DIR/dev_$DATE.db
+tar -czf $BACKUP_DIR/uploads_$DATE.tar.gz /opt/data_processing/data/uploads
 find $BACKUP_DIR -mtime +7 -delete
 echo "Backup completed: $DATE"
 EOF
@@ -466,10 +466,10 @@ docker-compose logs python-service
 
 ```bash
 # 检查数据库文件
-ls -la /opt/data_analysis_agent/data/prisma/
+ls -la /opt/data_processing/data/prisma/
 
 # 修复权限
-chmod 666 /opt/data_analysis_agent/data/prisma/dev.db
+chmod 666 /opt/data_processing/data/prisma/dev.db
 ```
 
 ### Q3: 端口被占用

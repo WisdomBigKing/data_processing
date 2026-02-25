@@ -6,7 +6,7 @@ print("=" * 60)
 print("分析: 真味道&好汤面.xlsx")
 print("=" * 60)
 
-wb = openpyxl.load_workbook(r'c:\Users\宇宙无敌智慧大将军\Desktop\test\data_analysis_agent\project\真味道&好汤面.xlsx')
+wb = openpyxl.load_workbook(r'c:\Users\宇宙无敌智慧大将军\Desktop\test\data_processing\project\真味道&好汤面.xlsx')
 print(f'Sheet names: {wb.sheetnames}')
 
 for sheet in wb.sheetnames:
@@ -20,7 +20,7 @@ print("\n" + "=" * 60)
 print("分析: 香爆脆本月目标进度.xlsx")
 print("=" * 60)
 
-wb2 = openpyxl.load_workbook(r'c:\Users\宇宙无敌智慧大将军\Desktop\test\data_analysis_agent\project\香爆脆本月目标进度.xlsx')
+wb2 = openpyxl.load_workbook(r'c:\Users\宇宙无敌智慧大将军\Desktop\test\data_processing\project\香爆脆本月目标进度.xlsx')
 print(f'Sheet names: {wb2.sheetnames}')
 
 for sheet in wb2.sheetnames:
@@ -34,7 +34,7 @@ print("\n" + "=" * 60)
 print("分析: 香爆脆追踪表客户别.xlsx")
 print("=" * 60)
 
-wb3 = openpyxl.load_workbook(r'c:\Users\宇宙无敌智慧大将军\Desktop\test\data_analysis_agent\project\香爆脆追踪表客户别.xlsx')
+wb3 = openpyxl.load_workbook(r'c:\Users\宇宙无敌智慧大将军\Desktop\test\data_processing\project\香爆脆追踪表客户别.xlsx')
 print(f'Sheet names: {wb3.sheetnames}')
 
 for sheet in wb3.sheetnames:
@@ -48,7 +48,7 @@ print("\n" + "=" * 60)
 print("分析: 香爆脆追踪表部所别05.31.xlsx")
 print("=" * 60)
 
-wb4 = openpyxl.load_workbook(r'c:\Users\宇宙无敌智慧大将军\Desktop\test\data_analysis_agent\project\香爆脆追踪表部所别05.31.xlsx')
+wb4 = openpyxl.load_workbook(r'c:\Users\宇宙无敌智慧大将军\Desktop\test\data_processing\project\香爆脆追踪表部所别05.31.xlsx')
 print(f'Sheet names: {wb4.sheetnames}')
 
 for sheet in wb4.sheetnames:

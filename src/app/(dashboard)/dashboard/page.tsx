@@ -74,287 +74,203 @@ export default function DashboardPage() {
     {
       title: "文件总数",
       value: stats.totalFiles,
-      icon: (
-        <svg
-          className="h-6 w-6 text-blue-600"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-          />
-        </svg>
-      ),
-      color: "bg-blue-100 dark:bg-blue-900/50",
+      icon: "📁",
+      color: "from-[var(--primary)]/20 to-[var(--secondary)]/10",
     },
     {
       title: "任务总数",
       value: stats.totalTasks,
-      icon: (
-        <svg
-          className="h-6 w-6 text-purple-600"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-          />
-        </svg>
-      ),
-      color: "bg-purple-100 dark:bg-purple-900/50",
+      icon: "📋",
+      color: "from-[var(--secondary)]/20 to-[var(--accent)]/10",
     },
     {
       title: "已完成",
       value: stats.completedTasks,
-      icon: (
-        <svg
-          className="h-6 w-6 text-green-600"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-      ),
-      color: "bg-green-100 dark:bg-green-900/50",
+      icon: "✅",
+      color: "from-[var(--success)]/20 to-[var(--primary)]/10",
     },
     {
       title: "进行中",
       value: stats.pendingTasks,
-      icon: (
-        <svg
-          className="h-6 w-6 text-yellow-600"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-      ),
-      color: "bg-yellow-100 dark:bg-yellow-900/50",
+      icon: "⏳",
+      color: "from-[var(--warning)]/20 to-[var(--error)]/10",
     },
   ];
 
   return (
     <div className="space-y-6">
       {/* 欢迎区域 */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 bg-[var(--card)] border border-[var(--border)] rounded-lg">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            欢迎回来，{user?.name}
+          <h1 className="text-2xl font-bold text-[var(--foreground)]">
+            👋 欢迎回来，{user?.name}！
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            这是您的数据分析工作台
+          <p className="text-[var(--foreground)] opacity-60 mt-1 text-sm">
+            这是你的工作台，今天想做点什么呢？
           </p>
         </div>
         <Link href="/files">
-          <Button>
-            <svg
-              className="h-4 w-4 mr-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            上传新文件
-          </Button>
+          <button className="px-5 py-2.5 rounded bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white font-medium hover:opacity-90 transition-all">
+            📤 上传文件
+          </button>
         </Link>
       </div>
 
       {/* 统计卡片 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((stat, index) => (
-          <Card key={index}>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-lg ${stat.color}`}>
-                  {stat.icon}
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {stat.title}
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {isLoading ? "-" : stat.value}
-                  </p>
-                </div>
+          <div
+            key={index}
+            className={`relative p-6 bg-gradient-to-br ${stat.color} border border-[var(--border)] rounded-lg hover:border-[var(--primary)] transition-all group overflow-hidden`}
+          >
+            <div className="relative flex items-center gap-4">
+              <div className="text-3xl">{stat.icon}</div>
+              <div>
+                <p className="text-sm text-[var(--foreground)] opacity-60">
+                  {stat.title}
+                </p>
+                <p className="text-2xl font-bold text-[var(--foreground)]">
+                  {isLoading ? "-" : stat.value}
+                </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ))}
       </div>
 
       {/* 快捷操作 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>最近任务</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-lg overflow-hidden">
+          <div className="p-4 border-b border-[var(--border)]">
+            <h3 className="font-bold text-[var(--foreground)]">📋 最近任务</h3>
+          </div>
+          <div className="p-4">
             {isLoading ? (
               <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div className="text-[var(--primary)] animate-pulse">
+                  加载中...
+                </div>
               </div>
             ) : recentTasks.length === 0 ? (
               <div className="text-center py-8">
-                <svg
-                  className="mx-auto h-12 w-12 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                  />
-                </svg>
-                <p className="mt-2 text-gray-500">暂无任务</p>
+                <div className="text-4xl mb-4">📭</div>
+                <p className="text-[var(--foreground)] opacity-50">暂无任务</p>
                 <Link href="/tasks">
-                  <Button variant="outline" className="mt-4">
-                    创建第一个任务
-                  </Button>
+                  <button className="mt-4 px-4 py-2 rounded border border-[var(--primary)] text-[var(--primary)] hover:bg-[var(--primary)]/10 transition-colors text-sm">
+                    + 创建任务
+                  </button>
                 </Link>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {recentTasks.map((task) => (
                   <Link key={task.id} href={`/tasks/${task.id}`}>
-                    <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors dark:border-gray-700 dark:hover:border-blue-600 dark:hover:bg-blue-900/20">
+                    <div className="flex items-center justify-between p-3 rounded border border-[var(--border)] hover:bg-[var(--muted)] hover:border-[var(--primary)] transition-all">
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 dark:text-white truncate">
+                        <p className="font-medium text-[var(--foreground)] truncate text-sm">
                           {task.name}
                         </p>
-                        <p className="text-sm text-gray-500 truncate">
-                          {task.file.originalName}
+                        <p className="text-xs text-[var(--foreground)] opacity-50 truncate">
+                          📄 {task.file.originalName}
                         </p>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <span
-                          className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(task.status)}`}
-                        >
+                      <div className="flex items-center gap-3">
+                        <span className="px-2 py-0.5 text-xs font-medium rounded border border-[var(--primary)]/50 text-[var(--primary)] bg-[var(--primary)]/10">
                           {getStatusText(task.status)}
                         </span>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-xs text-[var(--foreground)] opacity-40">
                           {formatDate(task.createdAt)}
                         </span>
                       </div>
                     </div>
                   </Link>
                 ))}
-                <Link href="/tasks" className="block text-center">
-                  <Button variant="ghost" className="w-full">
-                    查看全部任务
-                  </Button>
+                <Link href="/tasks" className="block text-center pt-2">
+                  <button className="text-[var(--primary)] text-sm">
+                    查看全部任务 →
+                  </button>
                 </Link>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>快捷操作</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg overflow-hidden">
+          <div className="p-4 border-b border-[var(--border)]">
+            <h3 className="font-bold text-[var(--foreground)]">🚀 快捷操作</h3>
+          </div>
+          <div className="p-3 space-y-2">
             <Link href="/files" className="block">
-              <div className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors dark:border-gray-700 dark:hover:border-blue-600 dark:hover:bg-blue-900/20">
-                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/50">
-                  <svg
-                    className="h-5 w-5 text-blue-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                    />
-                  </svg>
-                </div>
+              <div className="flex items-center gap-3 p-3 rounded border border-[var(--border)] hover:bg-[var(--muted)] hover:border-[var(--primary)] transition-all">
+                <div className="text-xl">📤</div>
                 <div>
-                  <p className="font-medium">上传文件</p>
-                  <p className="text-sm text-gray-500">上传数据文件进行分析</p>
+                  <p className="font-medium text-[var(--foreground)] text-sm">
+                    上传文件
+                  </p>
+                  <p className="text-xs text-[var(--foreground)] opacity-40">
+                    上传数据文件进行分析
+                  </p>
                 </div>
               </div>
             </Link>
 
             <Link href="/tasks" className="block">
-              <div className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50/50 transition-colors dark:border-gray-700 dark:hover:border-purple-600 dark:hover:bg-purple-900/20">
-                <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/50">
-                  <svg
-                    className="h-5 w-5 text-purple-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                </div>
+              <div className="flex items-center gap-3 p-3 rounded border border-[var(--border)] hover:bg-[var(--muted)] hover:border-[var(--primary)] transition-all">
+                <div className="text-xl">✨</div>
                 <div>
-                  <p className="font-medium">创建任务</p>
-                  <p className="text-sm text-gray-500">开始新的数据分析任务</p>
+                  <p className="font-medium text-[var(--foreground)] text-sm">
+                    创建任务
+                  </p>
+                  <p className="text-xs text-[var(--foreground)] opacity-40">
+                    开始新的数据分析任务
+                  </p>
                 </div>
               </div>
             </Link>
 
             <Link href="/reports" className="block">
-              <div className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50/50 transition-colors dark:border-gray-700 dark:hover:border-green-600 dark:hover:bg-green-900/20">
-                <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/50">
-                  <svg
-                    className="h-5 w-5 text-green-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                </div>
+              <div className="flex items-center gap-3 p-3 rounded border border-[var(--border)] hover:bg-[var(--muted)] hover:border-[var(--primary)] transition-all">
+                <div className="text-xl">📊</div>
                 <div>
-                  <p className="font-medium">查看报告</p>
-                  <p className="text-sm text-gray-500">下载分析报告</p>
+                  <p className="font-medium text-[var(--foreground)] text-sm">
+                    查看报告
+                  </p>
+                  <p className="text-xs text-[var(--foreground)] opacity-40">
+                    下载分析报告
+                  </p>
                 </div>
               </div>
             </Link>
-          </CardContent>
-        </Card>
+
+            <Link href="/report-generator" className="block">
+              <div className="flex items-center gap-3 p-3 rounded border border-[var(--border)] bg-gradient-to-r from-[var(--primary)]/10 to-[var(--secondary)]/10 hover:border-[var(--primary)] transition-all">
+                <div className="text-xl">🪄</div>
+                <div>
+                  <p className="font-medium text-[var(--foreground)] text-sm">
+                    智能报告
+                  </p>
+                  <p className="text-xs text-[var(--foreground)] opacity-40">
+                    AI帮你生成报告
+                  </p>
+                </div>
+              </div>
+            </Link>
+
+            <Link href="/article-processor" className="block">
+              <div className="flex items-center gap-3 p-3 rounded border border-[var(--border)] bg-gradient-to-r from-[var(--secondary)]/10 to-[var(--accent)]/10 hover:border-[var(--primary)] transition-all">
+                <div className="text-xl">📝</div>
+                <div>
+                  <p className="font-medium text-[var(--foreground)] text-sm">
+                    文章处理
+                  </p>
+                  <p className="text-xs text-[var(--foreground)] opacity-40">
+                    AI提取和处理文章
+                  </p>
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

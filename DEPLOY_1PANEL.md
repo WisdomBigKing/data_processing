@@ -27,7 +27,7 @@
 ```bash
 # 方式1：通过Git克隆
 cd /opt
-git clone <your-repo-url> data_analysis_agent
+git clone <your-repo-url> data_processing
 
 # 方式2：通过1Panel文件管理上传压缩包后解压
 ```
@@ -41,7 +41,7 @@ git clone <your-repo-url> data_analysis_agent
 1. 点击「创建编排」
 2. 选择「从 Compose 文件创建」
 3. 名称填写：`data-analysis-agent`
-4. 路径选择项目目录：`/opt/data_analysis_agent`
+4. 路径选择项目目录：`/opt/data_processing`
 
 #### 步骤 2：配置环境变量
 
@@ -63,7 +63,7 @@ LLM_API_KEY=你的OpenAI API Key（可选）
 
 ```bash
 # 进入项目目录
-cd /opt/data_analysis_agent
+cd /opt/data_processing
 
 # 创建数据库目录
 mkdir -p prisma
@@ -104,7 +104,7 @@ docker-compose up -d --build
 构建 Python 服务镜像：
 
 ```bash
-cd /opt/data_analysis_agent/python_service
+cd /opt/data_processing/python_service
 docker build -t python-agent-service:latest .
 ```
 
@@ -129,7 +129,7 @@ docker build -t python-agent-service:latest .
 构建 Web 服务镜像：
 
 ```bash
-cd /opt/data_analysis_agent
+cd /opt/data_processing
 docker build -t data-analysis-web:latest .
 ```
 
@@ -179,10 +179,10 @@ server {
 
 ### 重要目录说明
 
-| 目录           | 说明          | 建议挂载位置                            |
-| -------------- | ------------- | --------------------------------------- |
-| `/app/prisma`  | SQLite 数据库 | `/opt/data_analysis_agent/data/prisma`  |
-| `/app/uploads` | 用户上传文件  | `/opt/data_analysis_agent/data/uploads` |
+| 目录           | 说明          | 建议挂载位置                        |
+| -------------- | ------------- | ----------------------------------- |
+| `/app/prisma`  | SQLite 数据库 | `/opt/data_processing/data/prisma`  |
+| `/app/uploads` | 用户上传文件  | `/opt/data_processing/data/uploads` |
 
 ### 备份建议
 
@@ -195,10 +195,10 @@ DATE=$(date +%Y%m%d_%H%M%S)
 mkdir -p $BACKUP_DIR
 
 # 备份数据库
-cp /opt/data_analysis_agent/data/prisma/dev.db $BACKUP_DIR/dev_$DATE.db
+cp /opt/data_processing/data/prisma/dev.db $BACKUP_DIR/dev_$DATE.db
 
 # 备份上传文件
-tar -czf $BACKUP_DIR/uploads_$DATE.tar.gz /opt/data_analysis_agent/data/uploads
+tar -czf $BACKUP_DIR/uploads_$DATE.tar.gz /opt/data_processing/data/uploads
 
 # 保留最近7天的备份
 find $BACKUP_DIR -mtime +7 -delete
@@ -228,8 +228,8 @@ docker logs python-agent-service
 确保数据库文件存在且有正确权限：
 
 ```bash
-ls -la /opt/data_analysis_agent/data/prisma/
-chmod 666 /opt/data_analysis_agent/data/prisma/dev.db
+ls -la /opt/data_processing/data/prisma/
+chmod 666 /opt/data_processing/data/prisma/dev.db
 ```
 
 ### Q3: Python 服务无法连接
@@ -239,7 +239,7 @@ chmod 666 /opt/data_analysis_agent/data/prisma/dev.db
 ```bash
 # 确保两个容器在同一网络
 docker network ls
-docker network inspect data_analysis_agent_app-network
+docker network inspect data_processing_app-network
 ```
 
 ### Q4: 文件上传失败
@@ -247,7 +247,7 @@ docker network inspect data_analysis_agent_app-network
 检查上传目录权限：
 
 ```bash
-chmod -R 777 /opt/data_analysis_agent/data/uploads
+chmod -R 777 /opt/data_processing/data/uploads
 ```
 
 ### Q5: 内存不足
@@ -273,7 +273,7 @@ services:
 ## 🔄 更新部署
 
 ```bash
-cd /opt/data_analysis_agent
+cd /opt/data_processing
 
 # 拉取最新代码
 git pull

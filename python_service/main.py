@@ -53,6 +53,13 @@ import json
 # os: 操作系统接口，用于读取环境变量、文件路径等
 import os
 
+# dotenv: 加载.env文件中的环境变量
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # 如果没有安装python-dotenv，则跳过
+
 # ABC和abstractmethod: 用于定义抽象基类（一种设计模式，强制子类实现某些方法）
 from abc import ABC, abstractmethod
 
@@ -122,17 +129,17 @@ app.add_middleware(
 # 这些配置通过环境变量读取，方便在不同环境（开发、测试、生产）中使用不同的值
 # os.getenv("变量名", "默认值") - 如果环境变量不存在，则使用默认值
 
-# LLM（大语言模型）API的URL地址
-# 默认使用OpenAI的API，但也可以配置为其他兼容的API（如本地部署的模型）
-LLM_API_URL = os.getenv("LLM_API_URL", "https://api.openai.com/v1/chat/completions")
+# LLM（大语言模型）API的基础URL地址（不包含/chat/completions）
+# 默认使用阿里云的API，也可以配置为其他兼容的API
+LLM_API_URL = os.getenv("LLM_API_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
 
 # LLM API的密钥（用于身份验证）
 # 重要：生产环境中必须设置这个环境变量，不要在代码中硬编码密钥！
 LLM_API_KEY = os.getenv("LLM_API_KEY", "")
 
 # 使用的模型名称
-# gpt-4o-mini是OpenAI的一个高效模型，也可以换成gpt-4、gpt-3.5-turbo等
-LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o-mini")
+# 默认使用阿里云qwen-flash模型
+LLM_MODEL = os.getenv("LLM_MODEL", "qwen-flash-2025-07-28")
 
 # Agent最大迭代次数
 # 防止Agent陷入无限循环，超过这个次数就强制停止
@@ -1581,7 +1588,7 @@ class DataAnalysisAgent:
             # 使用httpx发送异步HTTP请求
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    LLM_API_URL,  # API地址
+                    f"{LLM_API_URL}/chat/completions",  # API地址
                     headers={
                         # Bearer Token认证
                         "Authorization": f"Bearer {LLM_API_KEY}",
@@ -3170,25 +3177,172 @@ async def download_file(path: str):
 
 
 # ============================================================================
-# 第7部分：程序入口
+# 第7部分：文章处理API
 # ============================================================================
-# 
-# 【if __name__ == "__main__" 是什么意思？】
-# 这是Python的一个常见模式，用于判断当前文件是被直接运行还是被导入。
-# - 直接运行（python main.py）：__name__ == "__main__"，执行下面的代码
-# - 被导入（import main）：__name__ == "main"，不执行下面的代码
-# 
-# 这样设计的好处是：
-# 1. 可以直接运行此文件启动服务
-# 2. 也可以在其他文件中导入此文件的类和函数，而不会自动启动服务
+
+class ArticleExtractRequest(BaseModel):
+    """文章提取请求"""
+    article: str
+
+class ArticleProcessRequest(BaseModel):
+    """文章处理请求"""
+    article: str
+    requirement: str
+
+async def call_llm_for_article(prompt: str, system_prompt: str) -> str:
+    """调用LLM处理文章"""
+    if not LLM_API_KEY:
+        return None
+    
+    try:
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            response = await client.post(
+                f"{LLM_API_URL}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {LLM_API_KEY}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": LLM_MODEL,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "temperature": 0.3
+                }
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                return result["choices"][0]["message"]["content"]
+            else:
+                print(f"LLM API错误: {response.status_code}")
+                return None
+    except Exception as e:
+        print(f"LLM调用失败: {e}")
+        return None
+
+@app.post("/api/article/extract")
+async def extract_article(request: ArticleExtractRequest):
+    """根据文章内容生成引题、主题、副题和摘要"""
+    article = request.article.strip()
+    
+    if not article:
+        raise HTTPException(status_code=400, detail="请提供文章内容")
+    
+    system_prompt = """你是一位专业的新闻编辑，擅长根据文章内容创作标题和摘要。
+请根据文章内容，自动生成合适的引题、主题、副题、摘要和标签。
+
+生成要求：
+1. 引题：用于引出主题的短句，起到吸引读者注意的作用，如果不需要可以为空
+2. 主题：文章的核心标题，简洁有力，概括文章主旨
+3. 副题：对主题的补充说明，提供更多信息，如果不需要可以为空
+4. 摘要：100-200字，概括文章核心内容
+5. 标签：2-5个关键词标签，用于分类和检索
+
+请严格按照以下JSON格式返回结果，不要添加任何其他内容：
+{
+    "leadTitle": "生成的引题",
+    "mainTitle": "生成的主题",
+    "subTitle": "生成的副题",
+    "summary": "生成的摘要",
+    "tags": ["标签1", "标签2"],
+    "processedArticle": ""
+}"""
+
+    prompt = f"""请根据以下文章内容，生成合适的引题、主题、副题、摘要和标签。
+
+【文章内容】
+{article}
+
+请严格按照JSON格式返回结果。"""
+
+    llm_response = await call_llm_for_article(prompt, system_prompt)
+    
+    if llm_response:
+        try:
+            content = llm_response.strip()
+            if content.startswith("```"):
+                content = content.split("```")[1]
+                if content.startswith("json"):
+                    content = content[4:]
+            result = json.loads(content)
+            return {"success": True, "result": result}
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=500, detail="LLM返回格式错误，无法解析JSON")
+    
+    raise HTTPException(status_code=500, detail="LLM服务不可用，请检查LLM_API_KEY环境变量配置")
+
+@app.post("/api/article/process")
+async def process_article(request: ArticleProcessRequest):
+    """按要求处理文章并生成标题"""
+    article = request.article.strip()
+    requirement = request.requirement.strip()
+    
+    if not article:
+        raise HTTPException(status_code=400, detail="请提供文章内容")
+    if not requirement:
+        raise HTTPException(status_code=400, detail="请提供处理要求")
+    
+    system_prompt = """你是一位专业的文章编辑，擅长按照要求改写和处理文章。
+
+重要原则：
+1. 必须完全围绕原文的中心内容进行处理
+2. 不要自己向外发散，不要添加原文没有的信息
+3. 保持原文的核心观点和事实准确性
+4. 按照用户的具体要求进行处理
+
+同时，你需要为处理后的文章生成合适的：
+- 引题：用于引出主题的短句
+- 主题：文章的核心标题
+- 副题：对主题的补充说明
+- 摘要：100-200字概括
+- 标签：2-5个关键词标签
+
+请严格按照以下JSON格式返回结果：
+{
+    "leadTitle": "生成的引题",
+    "mainTitle": "生成的主题",
+    "subTitle": "生成的副题",
+    "summary": "生成的摘要",
+    "tags": ["标签1", "标签2"],
+    "processedArticle": "处理后的完整文章"
+}"""
+
+    prompt = f"""请按照以下要求处理文章。
+
+【处理要求】
+{requirement}
+
+【原文内容】
+{article}
+
+请严格围绕原文中心内容进行处理，不要添加原文没有的信息，按照JSON格式返回结果。"""
+
+    llm_response = await call_llm_for_article(prompt, system_prompt)
+    
+    if llm_response:
+        try:
+            content = llm_response.strip()
+            if content.startswith("```"):
+                content = content.split("```")[1]
+                if content.startswith("json"):
+                    content = content[4:]
+            result = json.loads(content)
+            return {"success": True, "result": result}
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=500, detail="LLM返回格式错误，无法解析JSON")
+    
+    raise HTTPException(status_code=500, detail="LLM服务不可用，请检查LLM_API_KEY环境变量配置")
+
+
+# ============================================================================
+# 第8部分：程序入口
 # ============================================================================
 
 if __name__ == "__main__":
-    # 导入uvicorn - ASGI服务器，用于运行FastAPI应用
-    # ASGI（Asynchronous Server Gateway Interface）是Python异步Web服务器的标准接口
     import uvicorn
     
-    # 打印启动信息
     print("=" * 60)
     print("数据分析Agent服务 v2.0")
     print("=" * 60)
@@ -3198,11 +3352,6 @@ if __name__ == "__main__":
     print(f"最大迭代次数: {MAX_AGENT_ITERATIONS}")
     print("=" * 60)
     
-    # 启动服务
-    # host="0.0.0.0": 监听所有网络接口（允许外部访问）
-    # port=8000: 监听8000端口
-    # 启动后可以通过 http://localhost:8000 访问服务
-    # API文档可以通过 http://localhost:8000/docs 访问（FastAPI自动生成）
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 

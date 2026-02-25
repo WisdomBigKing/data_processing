@@ -50,68 +50,81 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 p-3 rounded-full bg-blue-100 dark:bg-blue-900/50 w-fit">
-            <svg
-              className="h-8 w-8 text-blue-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-              />
-            </svg>
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ background: "var(--background)" }}
+    >
+      <div className="w-full max-w-md">
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-8 shadow-lg">
+          <div className="text-center mb-8">
+            <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] flex items-center justify-center">
+              <span className="text-3xl">🚀</span>
+            </div>
+            <h1 className="text-2xl font-bold text-[var(--foreground)]">
+              神奇妙妙屋
+            </h1>
+            <p className="text-[var(--foreground)] mt-2 opacity-60 text-sm">
+              欢迎回来，请登录你的账户
+            </p>
           </div>
-          <CardTitle className="text-2xl">欢迎回来</CardTitle>
-          <CardDescription>进入您的神奇妙妙屋</CardDescription>
-        </CardHeader>
 
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            {error && (
-              <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm dark:bg-red-900/50 dark:text-red-400">
-                {error}
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              {error && (
+                <div className="p-3 rounded-md bg-[var(--error)]/10 border border-[var(--error)] text-[var(--error)] text-sm flex items-center gap-2">
+                  <span>⚠️</span> {error}
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--foreground)] mb-2">
+                  用户名
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  placeholder="请输入用户名"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 rounded-md border border-[var(--border)] bg-[var(--muted)] text-[var(--foreground)] placeholder-gray-400 focus:border-[var(--primary)] focus:outline-none transition-all"
+                />
               </div>
-            )}
 
-            <Input
-              id="name"
-              type="text"
-              label="用户名"
-              placeholder="请输入用户名"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+              <div>
+                <label className="block text-sm font-medium text-[var(--foreground)] mb-2">
+                  密码
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="请输入密码"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 rounded-md border border-[var(--border)] bg-[var(--muted)] text-[var(--foreground)] placeholder-gray-400 focus:border-[var(--primary)] focus:outline-none transition-all"
+                />
+              </div>
+            </div>
 
-            <Input
-              id="password"
-              type="password"
-              label="密码"
-              placeholder="请输入密码"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </CardContent>
+            <div className="mt-6">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3 px-4 rounded-md bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white font-medium hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? "登录中..." : "登录"}
+              </button>
+            </div>
+          </form>
 
-          <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full" isLoading={isLoading}>
-              登录
-            </Button>
-
-            <p className="text-sm text-center text-gray-600 dark:text-gray-400">
+          <div className="mt-6 pt-4 border-t border-[var(--border)] text-center">
+            <p className="text-xs text-[var(--foreground)] opacity-40">
               如需注册账户，请联系管理员
             </p>
-          </CardFooter>
-        </form>
-      </Card>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
